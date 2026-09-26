@@ -790,9 +790,8 @@ public struct MLXLanguageModel: FoundationModels.LanguageModel, Sendable {
                     }
 
                     // Reasoning is only consumed by the unconstrained path
-                    // (no tools, no schema). On the guided/tool paths the
-                    // grammar already constrains output, so suppression-prep
-                    // would be wasted work here. Continuation rounds run the
+                    // (no tools, no schema). The schema path renders thinking
+                    // off (below); continuation rounds run the
                     // tool path (below) like fresh turns: that path renders its
                     // own thinking state into the tool-aware prompt
                     // (`toolAwareContext`) -- thinking on with the think-then-call
@@ -801,12 +800,24 @@ public struct MLXLanguageModel: FoundationModels.LanguageModel, Sendable {
                         enabledToolDefinitions.isEmpty
                         && request.schema == nil
 
+                    // The schema path has no thinking phase. Left inside an open
+                    // `<think>`, Qwen3.8 fills the schema with placeholders.
+                    let isSchemaPath =
+                        enabledToolDefinitions.isEmpty
+                        && request.schema != nil
+                    let schemaSuppressesThinking: Bool = {
+                        guard isSchemaPath, let config = resolved.reasoningConfig,
+                            case .templateFlag = config.promptStrategy
+                        else { return false }
+                        return true
+                    }()
+
                     // When .reasoning is OMITTED on the unconstrained path,
                     // re-render the prompt with thinking off so the model
                     // doesn't emit `<think>`. Toggleable-only;
                     // .alwaysOn was already rejected above.
                     let suppressedInput: LMInput?
-                    if mayRunReasoningPath, !declaresReasoning,
+                    if (mayRunReasoningPath && !declaresReasoning) || schemaSuppressesThinking,
                         let suppressionConfig = resolved.reasoningConfig
                     {
                         suppressedInput = try await Self.preparedInput(
@@ -1150,7 +1161,7 @@ public struct MLXLanguageModel: FoundationModels.LanguageModel, Sendable {
                     } else if let schemaJSON {
                         try await runSchemaGeneration(
                             schemaJSON: schemaJSON,
-                            input: input,
+                            input: effectiveInput,
                             modelID: modelID,
                             requestedMaxTokens: requestedMaxTokens,
                             entryID: entryID,
