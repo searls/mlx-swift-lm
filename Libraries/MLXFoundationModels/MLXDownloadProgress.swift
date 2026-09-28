@@ -5,7 +5,7 @@
 // so it lives and dies with the adapter rather than surviving as an orphan
 // when the trait or the 27.0 SDK is absent.
 #if FoundationModelsIntegration
-#if canImport(FoundationModels, _version: 2)
+#if canImport(FoundationModels, _version: 2) && !os(tvOS)
 
 import Foundation
 

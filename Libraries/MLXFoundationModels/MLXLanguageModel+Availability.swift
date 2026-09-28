@@ -1,7 +1,7 @@
 // Copyright © 2026 Apple Inc.
 
 #if FoundationModelsIntegration
-#if canImport(FoundationModels, _version: 2)
+#if canImport(FoundationModels, _version: 2) && !os(tvOS)
 
 import Foundation
 import Metal

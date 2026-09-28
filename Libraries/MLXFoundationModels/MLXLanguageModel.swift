@@ -9,7 +9,7 @@
 // absent. A plain `canImport(FoundationModels)` is insufficient — the module
 // also ships in 26 — and `@available` cannot help, since it gates runtime
 // availability, not the compile-time presence of a symbol in the SDK.
-#if canImport(FoundationModels, _version: 2)
+#if canImport(FoundationModels, _version: 2) && !os(tvOS)
 
 import Foundation
 import FoundationModels

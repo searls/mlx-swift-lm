@@ -1,6 +1,6 @@
 // Copyright © 2026 Apple Inc.
 
-#if FoundationModelsIntegration && canImport(FoundationModels, _version: 2)
+#if FoundationModelsIntegration && canImport(FoundationModels, _version: 2) && !os(tvOS)
 
 import FoundationModels
 import MLXFoundationModels

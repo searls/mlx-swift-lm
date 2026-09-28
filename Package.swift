@@ -52,7 +52,9 @@ let package = Package(
         // older than iOS/macOS/visionOS 27.0, and the MLXDownloadProgress observable
         // (whose only producer is that adapter) is gated alongside it. Consumers
         // targeting older OS versions can still use this package for MLXLLM /
-        // MLXLMCommon / MLXEmbedders etc. by turning the trait off.
+        // MLXLMCommon / MLXEmbedders etc. by turning the trait off. tvOS ships the
+        // FoundationModels module with every symbol unavailable, so the adapter
+        // compiles empty there whatever the trait says.
         .trait(
             name: "FoundationModelsIntegration",
             description:
